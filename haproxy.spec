@@ -2,11 +2,11 @@
 #
 # sudo yum -y install rpmdevtools && rpmdev-setuptree
 # sudo yum -y install pcre-devel gcc make
-# wget https://raw.github.com/nmilford/rpm-haproxy/master/haproxy.spec -O ~/rpmbuild/SPECS/haproxy.spec
-# wget http://haproxy.1wt.eu/download/1.5/src/devel/haproxy-1.5-dev25.tar.gz -O ~/rpmbuild/SOURCES/haproxy-1.5-dev25.tar.gz
+# wget https://raw.github.com/wernerreuser/rpm-haproxy/master/haproxy.spec -O ~/rpmbuild/SPECS/haproxy.spec
+# wget http://haproxy.1wt.eu/download/1.5/src/haproxy-1.5-3.tar.gz -O ~/rpmbuild/SOURCES/haproxy-1.5-3.tar.gz
 # rpmbuild -bb  ~/rpmbuild/SPECS/haproxy.spec
 
-%define version 1.5.1
+%define version 1.5.3
 %{!?release: %{!?release: %define release 1}}
 
 Summary: HA-Proxy is a TCP/HTTP reverse proxy for high availability environments
@@ -16,9 +16,9 @@ Release: %{release}
 License: GPL
 Group: System Environment/Daemons
 URL: http://haproxy.1wt.eu/
-Source0: http://www.haproxy.org/download/1.5/src/haproxy-1.5.1.tar.gz
+Source0: http://www.haproxy.org/download/1.5/src/haproxy-1.5.3.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: pcre-devel make gcc openssl-devel
+BuildRequires: pcre-devel make gcc openssl-devel zlib-devel
 Requires: /sbin/chkconfig, /sbin/service
 
 %description
@@ -38,13 +38,13 @@ handle thousands of simultaneous connections on hundreds of instances without
 risking the system's stability.
 
 %prep
-%setup -n %{name}-%{version}-%{dev_rel}
+%setup -n %{name}-%{version}
 
 # We don't want any perl dependecies in this RPM:
 %define __perl_requires /bin/true
 
 %build
-%{__make} USE_PCRE=1 DEBUG="" ARCH=%{_target_cpu} TARGET=linux26 USE_OPENSSL=1
+%{__make} DEBUG="" ARCH=X86_64 TARGET=linux2628 USE_OPENSSL=1 USE_PCRE=1 USE_ZLIB=1 USE_LINUX_TPROXY=1
 
 %install
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
@@ -83,7 +83,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc CHANGELOG TODO examples/*.cfg doc/haproxy-en.txt doc/haproxy-fr.txt doc/architecture.txt doc/configuration.txt
+%doc CHANGELOG examples/*.cfg doc/haproxy-en.txt doc/haproxy-fr.txt doc/architecture.txt doc/configuration.txt
 %doc %{_mandir}/man1/%{name}.1*
 
 %attr(0755,root,root) %{_sbindir}/%{name}
@@ -94,6 +94,9 @@ fi
 %attr(0755,haproxy,haproxy) %{_sharedstatedir}/haproxy
 
 %changelog
+* Wed Jul 29 2014 Werner Reuser <werner@orangecows.net>
+- updated to 1.5.3, Fixed a few typos, Optimized for our environment.
+
 * Wed Jun 25 2014 Tim Shelton <timothy.shelton@gmail.com>
 - updated to 1.5.1
 
